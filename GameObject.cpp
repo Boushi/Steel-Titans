@@ -1,4 +1,6 @@
-GameObject(){
+#include "GameObject.h"
+
+GameObject::GameObject(){
 	objectBox.x = 0;
 	objectBox.y = 0;
 	objectBox.w = 0;
@@ -7,9 +9,11 @@ GameObject(){
 	ymove = 0;
 	direction = 0;
 	frame = 0;
+	windowXSize = 640;
+	windowYSize = 480;
 }
 
-GameObject(int x, int y, int w, int h){
+GameObject::GameObject(int x, int y, int w, int h){
 	objectBox.x = x;
 	objectBox.y = y;
 	objectBox.w = w;
@@ -18,9 +22,11 @@ GameObject(int x, int y, int w, int h){
 	ymove = 0;
 	direction = 0;
 	frame = 0;
+	windowXSize = 640;
+	windowYSize = 480;
 }
 
-bool collisionCheck(std::vector<SDL_Rect> &B){
+bool GameObject::collisionCheck(std::vector<SDL_Rect> &B){
     int maxXb, minXb, maxYb, minYb;
 
     for(int i = 0; i<B.size();i++){
@@ -35,14 +41,39 @@ bool collisionCheck(std::vector<SDL_Rect> &B){
 
     }
     return false;
+}
 
-
-void move(){
+void GameObject::move(){
 	if(!(((objectBox.x+xmove)<0)||((objectBox.x+objectBox.w+xmove)>windowXSize)||collisionCheck(map))){
-		objectBox.x+=xmove;
+		objectBox.x += xmove;
 	}
 	if(!(((objectBox.y+ymove)<0)||((objectBox.y+objectBox.h+xmove)>windowYSize)||collisionCheck(map))){
-		objectBox.y+=ymove;
+		objectBox.y += ymove;
 	}
 }
 
+SDL_Surface* GameObject::loadImage(std::string file){
+    SDL_Surface* loadedImage = NULL;
+    SDL_Surface* optimizedImage = NULL;
+
+    loadedImage = IMG_Load( file.c_str() );
+
+    if( loadedImage != NULL )
+    {
+        optimizedImage = SDL_DisplayFormat( loadedImage );
+        SDL_FreeSurface( loadedImage );
+
+        if( optimizedImage != NULL )
+        {
+            SDL_SetColorKey( optimizedImage, SDL_SRCCOLORKEY, SDL_MapRGB( optimizedImage->format, 0, 55, 0 ) );
+        }
+    }
+    return optimizedImage;
+}
+
+void GameObject::applySurface(int x ,int y ,SDL_Surface* source ,SDL_Surface* destination ,SDL_Rect* clip){
+    SDL_Rect offset;
+	offset.x = x;
+    offset.y = y;
+    SDL_BlitSurface( source, clip, destination, &offset );
+}
